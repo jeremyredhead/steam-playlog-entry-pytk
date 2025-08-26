@@ -1,3 +1,33 @@
+#==LOGIC SECTION==
+import os
+from collections import namedtuple
+
+def parse_date(s):
+    parse = datetime.datetime.strptime
+    formats = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
+    for fmt in formats:
+        try:
+            return parse(s, fmt)
+        except:
+            pass
+    return None
+
+PLAYLOG_SUFFIX = '-playlog.txt'
+
+Game = namedtuple('Game', ['file', 'name'])
+def list_games(path=None):
+    games = [f for f in os.listdir(path) if f.endswith(PLAYLOG_SUFFIX)]
+    games = [Game(f, f.removesuffix(PLAYLOG_SUFFIX).replace('-', ' ')) for f in games]
+    for i, game in enumerate(games):
+        with open(game.file) as f:
+            first_line = f.readline()
+            if first_line.startswith('NAME:'):
+                name = first_line.removeprefix('NAME:').strip()
+                games[i] = game._replace(name=name)
+    return games
+
+
+#==UI SECTION==
 from tkinter import *
 from tkinter import ttk
 # from tkinter.ttk import *
