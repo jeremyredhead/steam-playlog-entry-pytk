@@ -8,6 +8,7 @@ from collections import namedtuple
 DATE_FORMATS = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
 PREF_DATE_FMT = DATE_FORMATS[0]
 PLAYLOG_SUFFIX = '-playlog.txt'
+NAMELINE_PREFIX = 'NAME:'
 
 def parse_date(s):
     parse = datetime.datetime.strptime
@@ -25,8 +26,8 @@ def list_games(path=None):
     for i, game in enumerate(games):
         with open(game.file) as f:
             first_line = f.readline()
-            if first_line.startswith('NAME:'):
-                name = first_line.removeprefix('NAME:').strip()
+            if first_line.startswith(NAMELINE_PREFIX):
+                name = first_line.removeprefix(NAMELINE_PREFIX).strip()
                 games[i] = game._replace(name=name)
     return games
 
