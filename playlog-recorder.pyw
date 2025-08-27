@@ -58,7 +58,8 @@ def center_window(root, width=300, height=200):
     root.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
 class AddPlaylogEntry:
-    LABEL_SIDE = 'w' or 'e' or None
+    # 'w' (left), 'e' (right), or None (centered)
+    LABEL_SIDE = 'e'
 
     def __init__(self, root):
         frm = ttk.Frame(root, padding=10)
