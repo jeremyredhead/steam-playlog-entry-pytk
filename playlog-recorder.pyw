@@ -66,21 +66,32 @@ class AddPlaylogEntry:
         frm.grid()
 
         LABEL_SIDE = self.LABEL_SIDE
-        # TODO: combobox for game name
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
-        Entry(frm).grid(column=1, row=0)
+        self.game_select = ttk.Combobox(frm)
+        self.game_select.grid(column=1, row=0)
+        # TODO: fetch values from files on disk
+        # XXX: how to correlate game name to filename? what if multiple files for one game?
+        self.game_select['values'] = ['Spelunky 2', 'Among Us', 'UFO 50']
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
-        Entry(frm).grid(column=1, row=1)
+        self.last_played = ttk.Combobox(frm)
+        self.last_played.grid(column=1, row=1)
+        # TODO: fetch value (singular) from last entry of selected game's playlog
+        # XXX: what if no entry/file? try to render an Entry instead in that case?
+        self.last_played['values'] = ['Jul 13']
 
         Label(frm, text='Play time:').grid(column=0, row=2, sticky=LABEL_SIDE)
 
         sf = Frame(frm)
         sf.grid(column=1, row=2, sticky='w')
-        Entry(sf, width=7).grid(column=0, row=0)
+        self.play_time = Entry(sf, width=7)
+        self.play_time.grid(column=0, row=0)
         Label(sf, text='hours').grid(column=1, row=0)
 
         ttk.Button(frm, text='Save entry').grid(column=1, row=3, sticky='e')
+
+        frm.rowconfigure(0, pad=2)
+        frm.rowconfigure(1, pad=2)
 
 root = Tk()
 root.title('Steam Playlog Recorder')
