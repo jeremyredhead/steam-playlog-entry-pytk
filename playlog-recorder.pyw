@@ -86,4 +86,9 @@ root = Tk()
 root.title('Steam Playlog Recorder')
 center_window(root, 250, 110)
 AddPlaylogEntry(root)
-root.mainloop()
+
+import sys
+if 'idlelib' in sys.modules:
+    root.update()
+else:
+    root.mainloop()
