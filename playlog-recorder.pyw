@@ -101,5 +101,6 @@ AddPlaylogEntry(root)
 import sys
 if 'idlelib' in sys.modules:
     root.update()
+    root.attributes('-topmost', True)
 else:
     root.mainloop()
