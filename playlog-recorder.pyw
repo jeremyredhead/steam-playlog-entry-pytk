@@ -3,17 +3,19 @@ import os
 import datetime
 from collections import namedtuple
 
+# Constants
+DATE_FORMATS = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
+PREF_DATE_FMT = DATE_FORMATS[0]
+PLAYLOG_SUFFIX = '-playlog.txt'
+
 def parse_date(s):
     parse = datetime.datetime.strptime
-    formats = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
-    for fmt in formats:
+    for fmt in DATE_FORMATS:
         try:
             return parse(s, fmt)
         except:
             pass
     return None
-
-PLAYLOG_SUFFIX = '-playlog.txt'
 
 Game = namedtuple('Game', ['file', 'name'])
 def list_games(path=None):
