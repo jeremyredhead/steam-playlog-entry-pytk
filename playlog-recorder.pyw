@@ -1,6 +1,7 @@
 #==LOGIC SECTION==
 import os
 import datetime
+import textwrap
 from collections import namedtuple
 
 # Constants
@@ -28,6 +29,16 @@ def list_games(path=None):
                 name = first_line.removeprefix('NAME:').strip()
                 games[i] = game._replace(name=name)
     return games
+
+def assemble_entry(last_played, play_time):
+    # FIXME: ensure consistent results in date locale-wise
+    date = datetime.datetime.now().strftime(PREF_DATE_FMT)
+    entry = f"""\
+    {date}:
+    \tlast played: {last_played}
+    \tplay time: {play_time} hours
+    """
+    return textwrap.dedent(entry)
 
 
 #==UI SECTION==
