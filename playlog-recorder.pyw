@@ -95,14 +95,15 @@ class PlaylogList(collections.UserList):
             return '(never)'
         elif len(files) == 1:
             entries = parse_playlog_entries(files[0])
-            date = parse_date(entries[-1].entry_date)
+            entry_date_text = entries[-1].entry_date
+            date = parse_date(entry_date_text)
             if date:
                 if date.year == datetime.datetime.now().year:
                     return date.strftime('%b %d')
                 else:
                     return date.strftime('%b %d, %Y')
             else:
-                return 'Unknown (unable to parse last playlog entry date)'
+                return entry_date_text
         else:
             return 'Unknown (duplicate playlogs error!)'
 
