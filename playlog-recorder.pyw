@@ -2,13 +2,11 @@
 import os
 import datetime
 import textwrap
-from collections import namedtuple
+import collections
 
 # Constants
 DATE_FORMATS = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
 PREF_DATE_FMT = DATE_FORMATS[0]
-PLAYLOG_SUFFIX = '-playlog.txt'
-NAMELINE_PREFIX = 'NAME:'
 
 def parse_date(s):
     parse = datetime.datetime.strptime
@@ -19,17 +17,36 @@ def parse_date(s):
             pass
     return None
 
-Game = namedtuple('Game', ['file', 'name'])
-def list_games(path=None):
-    games = [f for f in os.listdir(path) if f.endswith(PLAYLOG_SUFFIX)]
-    games = [Game(f, f.removesuffix(PLAYLOG_SUFFIX).replace('-', ' ')) for f in games]
-    for i, game in enumerate(games):
-        with open(game.file) as f:
-            first_line = f.readline()
-            if first_line.startswith(NAMELINE_PREFIX):
-                name = first_line.removeprefix(NAMELINE_PREFIX).strip()
-                games[i] = game._replace(name=name)
-    return games
+Playlog = collections.namedtuple('Playlog', ['file', 'game'])
+
+class PlaylogList(collections.UserList):
+    """List of Playlogs. Duh."""
+
+    FILENAME_SUFFIX = '-playlog.txt'
+    NAMELINE_PREFIX = 'NAME:'
+
+    # TODO: allow configuring prefix/suffix(s) via keyword arguments
+    # -- may require inheriting from list instead, see <https://stackoverflow.com/a/76769083>
+    def __init__(self, playlogs=None):
+        super().__init__(playlogs)
+        self.data = playlogs or []
+
+    @classmethod
+    def filename_to_gamename(Class, filename):
+        return filename.removesuffix(Class.FILENAME_SUFFIX).replace('-', ' ')
+
+    # FIXME: better more descriptive name
+    @classmethod
+    def generate(Class, path=None):
+        files = [f for f in os.listdir(path) if f.endswith(Class.FILENAME_SUFFIX)]
+        games = [Playlog(f, game=Class.filename_to_gamename(f)) for f in files]
+        for i, game in enumerate(games):
+            with open(game.file) as f:
+                first_line = f.readline()
+                if first_line.startswith(Class.NAMELINE_PREFIX):
+                    name = first_line.removeprefix(Class.NAMELINE_PREFIX).strip()
+                    games[i] = game._replace(game=name)
+        return Class(games)
 
 def assemble_entry(last_played, play_time):
     # FIXME: ensure consistent results in date locale-wise
