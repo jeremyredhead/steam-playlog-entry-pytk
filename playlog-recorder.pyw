@@ -24,6 +24,7 @@ class PlaylogList(collections.UserList):
 
     FILENAME_SUFFIX = '-playlog.txt'
     NAMELINE_PREFIX = 'NAME:'
+    PLAYLOGS_FOLDER = os.path.join(os.path.expanduser('~'), 'Documents', 'playlogs')
 
     # TODO: allow configuring prefix/suffix(s) via keyword arguments
     # -- may require inheriting from list instead, see <https://stackoverflow.com/a/76769083>
@@ -36,17 +37,19 @@ class PlaylogList(collections.UserList):
         return filename.removesuffix(Class.FILENAME_SUFFIX).replace('-', ' ')
 
     # FIXME: better more descriptive name
+    # FIXME: shouldn't require supplied path to be the current dir FFS
     @classmethod
     def generate(Class, path=None):
+        os.chdir(path) # HACK
         files = [f for f in os.listdir(path) if f.endswith(Class.FILENAME_SUFFIX)]
-        games = [Playlog(f, game=Class.filename_to_gamename(f)) for f in files]
-        for i, game in enumerate(games):
-            with open(game.file) as f:
+        logs = [Playlog(f, game=Class.filename_to_gamename(f)) for f in files]
+        for i, log in enumerate(logs):
+            with open(log.file) as f:
                 first_line = f.readline()
                 if first_line.startswith(Class.NAMELINE_PREFIX):
                     name = first_line.removeprefix(Class.NAMELINE_PREFIX).strip()
-                    games[i] = game._replace(game=name)
-        return Class(games)
+                    logs[i] = log._replace(game=name)
+        return Class(logs)
 
     def game_names(self):
         # TODO: sort order?
