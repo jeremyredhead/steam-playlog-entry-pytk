@@ -48,6 +48,19 @@ class PlaylogList(collections.UserList):
                     games[i] = game._replace(game=name)
         return Class(games)
 
+    def game_names(self):
+        # TODO: sort order?
+        return [playlog.game for playlog in self.data]
+
+    @classmethod
+    # TODO: instead return number representing how close a match
+    def compare_names(Class, name_a, name_b):
+        return name_a.lower() == name_b.lower()
+
+    def get_filenames_for(self, game):
+        """Return list of playlog files that possibly record that game."""
+        return [p.file for p in self.data if self.compare_names(p.game, game)]
+
 def assemble_entry(last_played, play_time):
     # FIXME: ensure consistent results in date locale-wise
     date = datetime.datetime.now().strftime(PREF_DATE_FMT)
