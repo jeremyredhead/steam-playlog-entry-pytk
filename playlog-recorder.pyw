@@ -89,6 +89,23 @@ class PlaylogList(collections.UserList):
         """Return list of playlog files that possibly record that game."""
         return [p.file for p in self.data if self.compare_names(p.game, game)]
 
+    def get_last_played_for(self, game):
+        files = self.get_filenames_for(game)
+        if not files:
+            return '(never)'
+        elif len(files) == 1:
+            entries = parse_playlog_entries(files[0])
+            date = parse_date(entries[-1].entry_date)
+            if date:
+                if date.year == datetime.datetime.now().year:
+                    return date.strftime('%b %d')
+                else:
+                    return date.strftime('%b %d, %Y')
+            else:
+                return 'Unknown (unable to parse last playlog entry date)'
+        else:
+            return 'Unknown (duplicate playlogs error!)'
+
 def assemble_entry(last_played, play_time):
     # FIXME: ensure consistent results in date locale-wise
     date = datetime.datetime.now().strftime(PREF_DATE_FMT)
@@ -115,6 +132,8 @@ def center_window(root, width=300, height=200):
     y = (screen_height/2) - (height/2)
     root.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
+PLAYLOG_LIST = PlaylogList.generate(PlaylogList.PLAYLOGS_FOLDER)
+
 class AddPlaylogEntry:
     # 'w' (left), 'e' (right), or None (centered)
     LABEL_SIDE = 'e'
@@ -123,20 +142,18 @@ class AddPlaylogEntry:
         frm = ttk.Frame(root, padding=10)
         frm.grid()
 
+
         LABEL_SIDE = self.LABEL_SIDE
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
         self.game_select = ttk.Combobox(frm)
         self.game_select.grid(column=1, row=0)
-        # TODO: fetch values from files on disk
-        # XXX: how to correlate game name to filename? what if multiple files for one game?
-        self.game_select['values'] = ['Spelunky 2', 'Among Us', 'UFO 50']
+        self.game_select['values'] = PLAYLOG_LIST.game_names()
+        self.game_select.bind('<<ComboboxSelected>>', lambda e: self.last_played.config(values=[PLAYLOG_LIST.get_last_played_for(self.game_select.get())]))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
         self.last_played = ttk.Combobox(frm)
         self.last_played.grid(column=1, row=1)
-        # TODO: fetch value (singular) from last entry of selected game's playlog
-        # XXX: what if no entry/file? try to render an Entry instead in that case?
-        self.last_played['values'] = ['Jul 13']
+        self.last_played['values'] = ['(never)']
 
         Label(frm, text='Play time:').grid(column=0, row=2, sticky=LABEL_SIDE)
 
