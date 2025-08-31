@@ -17,6 +17,31 @@ def parse_date(s):
             pass
     return None
 
+class PlaylogEntry():
+    def __init__(self, entry_date, last_played, play_time):
+        self.entry_date = entry_date
+        self.last_played = last_played
+        self.play_time = play_time
+
+def parse_playlog_entries(file):
+    entries = []
+    with open(file) as fd:
+        for line in fd:
+            line = line.rstrip()
+            if line[-1] == ':':
+                entries.append(PlaylogEntry(line[:-1], '', ''))
+            # indented by tab or at least two spaces
+            elif line[0] == '\t' or line[0:2] == '  ':
+                key, value = line.lstrip().split(': ', 1)
+                if key.lower() == 'last played':
+                    entries[-1].last_played = value
+                if key.lower() == 'play time':
+                    entries[-1].play_time = value
+                # ignore unrecognized keys
+            else:
+                pass # ignore unrecognized lines
+    return entries
+
 Playlog = collections.namedtuple('Playlog', ['file', 'game'])
 
 class PlaylogList(collections.UserList):
