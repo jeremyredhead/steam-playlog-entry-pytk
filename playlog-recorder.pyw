@@ -28,6 +28,7 @@ def parse_playlog_entries(file):
     with open(file) as fd:
         for line in fd:
             line = line.rstrip()
+            if not line: continue
             if line[-1] == ':':
                 entries.append(PlaylogEntry(line[:-1], '', ''))
             # indented by tab or at least two spaces
@@ -95,6 +96,8 @@ class PlaylogList(collections.UserList):
             return '(never)'
         elif len(files) == 1:
             entries = parse_playlog_entries(files[0])
+            if not entries:
+                return '(never)'
             entry_date_text = entries[-1].entry_date
             date = parse_date(entry_date_text)
             if date:
