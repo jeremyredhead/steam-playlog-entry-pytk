@@ -71,23 +71,24 @@ class PlaylogFolder():
     NAMELINE_PREFIX = 'NAME:'
     PLAYLOGS_FOLDER = os.path.join(os.path.expanduser('~'), 'Documents', 'playlogs')
 
-    # TODO: allow configuring prefix/suffix(s) via keyword arguments
-    def __init__(self, path=None):
+    def __init__(self, path=None, *, log_suffix=None, nameline_prefix=None):
         # XXX: what if path doesn't exist or isn't a folder?
         self.path = path or self.PLAYLOGS_FOLDER
+        self.log_suffix = log_suffix or self.FILENAME_SUFFIX
+        self.nameline_prefix = nameline_prefix or self.NAMELINE_PREFIX
         self.update()
 
     def _get_game_name(self, file):
         # used as a fallback when a file lacks a NAME: line
-        name = os.path.basename(file).removesuffix(self.FILENAME_SUFFIX).replace('-', ' ')
+        name = os.path.basename(file).removesuffix(self.log_suffix).replace('-', ' ')
         with open(file) as f:
             first_line = f.readline()
-            if first_line.startswith(self.NAMELINE_PREFIX):
-                name = first_line.removeprefix(self.NAMELINE_PREFIX).strip()
+            if first_line.startswith(self.nameline_prefix):
+                name = first_line.removeprefix(self.nameline_prefix).strip()
         return name
 
     def update(self):
-        is_playlog = lambda f: f.is_file() and f.name.endswith(self.FILENAME_SUFFIX)
+        is_playlog = lambda f: f.is_file() and f.name.endswith(self.log_suffix)
         files = [f for f in os.scandir(self.path) if is_playlog(f)]
         logs = [Playlog(f.path, game=self._get_game_name(f)) for f in files]
         self._logs = logs
