@@ -158,11 +158,10 @@ class AddPlaylogEntry:
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
         self.game_select = ttk.Combobox(frm)
         self.game_select.grid(column=1, row=0)
-        # TODO: auto-completing combo box
-        self.game_select['values'] = PLAYLOG_HOLDER.game_names()
+        self.refresh_games_dropdown()
 
         # FIXME: "Last played" should update when "Game" is edited in any way, not just selected
-        self.game_select.bind('<<ComboboxSelected>>', lambda e: self.last_played.config(values=[PLAYLOG_HOLDER.get_last_played_for(self.game_select.get())]))
+        self.game_select.bind('<<ComboboxSelected>>', self.refresh_last_played_dropdown)
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
         self.last_played = ttk.Combobox(frm)
@@ -181,6 +180,14 @@ class AddPlaylogEntry:
 
         frm.rowconfigure(0, pad=2)
         frm.rowconfigure(1, pad=2)
+
+    def refresh_games_dropdown(self):
+        # TODO: auto-completing combo box
+        self.game_select['values'] = PLAYLOG_HOLDER.game_names()
+
+    def refresh_last_played_dropdown(self, event):
+        last_played = PLAYLOG_HOLDER.get_last_played_for(self.game_select.get())
+        self.last_played.config(values=[last_played])
 
 root = Tk()
 # TODO: look into .iconbitmap() et al to set window icon to a custom thing
