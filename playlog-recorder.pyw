@@ -77,19 +77,19 @@ class PlaylogFolder():
         self.path = path or self.PLAYLOGS_FOLDER
         self.update()
 
-    @classmethod
-    def filename_to_gamename(Class, filename):
-        return filename.removesuffix(Class.FILENAME_SUFFIX).replace('-', ' ')
+    def _get_game_name(self, file):
+        # used as a fallback when a file lacks a NAME: line
+        name = os.path.basename(file).removesuffix(self.FILENAME_SUFFIX).replace('-', ' ')
+        with open(file) as f:
+            first_line = f.readline()
+            if first_line.startswith(self.NAMELINE_PREFIX):
+                name = first_line.removeprefix(self.NAMELINE_PREFIX).strip()
+        return name
 
     def update(self):
-        files = [f for f in os.scandir(self.path) if f.name.endswith(self.FILENAME_SUFFIX)]
-        logs = [Playlog(f.path, game=self.filename_to_gamename(f.name)) for f in files]
-        for i, log in enumerate(logs):
-            with open(log.file) as f:
-                first_line = f.readline()
-                if first_line.startswith(self.NAMELINE_PREFIX):
-                    name = first_line.removeprefix(self.NAMELINE_PREFIX).strip()
-                    logs[i] = log._replace(game=name)
+        is_playlog = lambda f: f.is_file() and f.name.endswith(self.FILENAME_SUFFIX)
+        files = [f for f in os.scandir(self.path) if is_playlog(f)]
+        logs = [Playlog(f.path, game=self._get_game_name(f)) for f in files]
         self._logs = logs
 
     def game_names(self):
