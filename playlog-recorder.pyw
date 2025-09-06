@@ -151,12 +151,16 @@ class AddPlaylogEntry:
         frm = ttk.Frame(root, padding=10)
         frm.grid()
 
+        # REMINDER: .get() to get a field's value (.insert() and .delete() to alter a text field)
 
         LABEL_SIDE = self.LABEL_SIDE
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
         self.game_select = ttk.Combobox(frm)
         self.game_select.grid(column=1, row=0)
+        # TODO: auto-completing combo box
         self.game_select['values'] = PLAYLOG_HOLDER.game_names()
+
+        # FIXME: "Last played" should update when "Game" is edited in any way, not just selected
         self.game_select.bind('<<ComboboxSelected>>', lambda e: self.last_played.config(values=[PLAYLOG_HOLDER.get_last_played_for(self.game_select.get())]))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
@@ -178,6 +182,7 @@ class AddPlaylogEntry:
         frm.rowconfigure(1, pad=2)
 
 root = Tk()
+# TODO: look into .iconbitmap() et al to set window icon to a custom thing
 root.title('Steam Playlog Recorder')
 center_window(root, 250, 110)
 AddPlaylogEntry(root)
