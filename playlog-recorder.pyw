@@ -23,6 +23,9 @@ class PlaylogEntry():
         self.last_played = last_played
         self.play_time = play_time
 
+    def __repr__(self):
+        return f'{type(self).__name__}(%s)' % ', '.join([f'{k}={repr(v)}' for (k,v) in vars(self).items()])
+
 def parse_playlog_entries(file):
     entries = []
     with open(file) as fd:
