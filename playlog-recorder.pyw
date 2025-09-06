@@ -82,12 +82,10 @@ class PlaylogList(collections.UserList):
         return filename.removesuffix(Class.FILENAME_SUFFIX).replace('-', ' ')
 
     # FIXME: better more descriptive name
-    # FIXME: shouldn't require supplied path to be the current dir FFS
     @classmethod
     def generate(Class, path=None):
-        os.chdir(path) # HACK
-        files = [f for f in os.listdir(path) if f.endswith(Class.FILENAME_SUFFIX)]
-        logs = [Playlog(f, game=Class.filename_to_gamename(f)) for f in files]
+        files = [f for f in os.scandir(path) if f.name.endswith(Class.FILENAME_SUFFIX)]
+        logs = [Playlog(f.path, game=Class.filename_to_gamename(f.name)) for f in files]
         for i, log in enumerate(logs):
             with open(log.file) as f:
                 first_line = f.readline()
