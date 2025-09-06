@@ -23,6 +23,20 @@ class PlaylogEntry():
         self.last_played = last_played
         self.play_time = play_time
 
+    @classmethod
+    def now(Class, last_played, play_time):
+        # FIXME: ensure consistent results in date locale-wise
+        entry_date = datetime.datetime.now().strftime(PREF_DATE_FMT)
+        return Class(entry_date, last_played, play_time)
+
+    def __str__(self):
+        entry = f"""\
+        {self.entry_date}:
+        \tlast played: {self.last_played}
+        \tplay time: {self.play_time} hours
+        """
+        return textwrap.dedent(entry)
+
     def __repr__(self):
         name = type(self).__name__
         args = ', '.join([f'{k}={repr(v)}' for (k,v) in vars(self).items()])
@@ -114,16 +128,6 @@ class PlaylogList(collections.UserList):
                 return entry_date_text
         else:
             return 'Unknown (duplicate playlogs error!)'
-
-def assemble_entry(last_played, play_time):
-    # FIXME: ensure consistent results in date locale-wise
-    date = datetime.datetime.now().strftime(PREF_DATE_FMT)
-    entry = f"""\
-    {date}:
-    \tlast played: {last_played}
-    \tplay time: {play_time} hours
-    """
-    return textwrap.dedent(entry)
 
 
 #==UI SECTION==
