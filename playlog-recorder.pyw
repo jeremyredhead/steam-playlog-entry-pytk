@@ -42,7 +42,7 @@ def parse_playlog_entries(file):
                 if key.lower() == 'last played':
                     entries[-1].last_played = value
                 if key.lower() == 'play time':
-                    entries[-1].play_time = value
+                    entries[-1].play_time = value.removesuffix('hours').strip()
                 # ignore unrecognized keys
             else:
                 pass # ignore unrecognized lines
