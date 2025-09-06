@@ -24,7 +24,9 @@ class PlaylogEntry():
         self.play_time = play_time
 
     def __repr__(self):
-        return f'{type(self).__name__}(%s)' % ', '.join([f'{k}={repr(v)}' for (k,v) in vars(self).items()])
+        name = type(self).__name__
+        args = ', '.join([f'{k}={repr(v)}' for (k,v) in vars(self).items()])
+        return f'{name}({args})'
 
 def parse_playlog_entries(file):
     entries = []
