@@ -64,39 +64,37 @@ def parse_playlog_entries(file):
 
 Playlog = collections.namedtuple('Playlog', ['file', 'game'])
 
-class PlaylogList(collections.UserList):
-    """List of Playlogs. Duh."""
+class PlaylogFolder():
+    """A folder with Playlogs in it. Duh."""
 
     FILENAME_SUFFIX = '-playlog.txt'
     NAMELINE_PREFIX = 'NAME:'
     PLAYLOGS_FOLDER = os.path.join(os.path.expanduser('~'), 'Documents', 'playlogs')
 
     # TODO: allow configuring prefix/suffix(s) via keyword arguments
-    # -- may require inheriting from list instead, see <https://stackoverflow.com/a/76769083>
-    def __init__(self, playlogs=None):
-        super().__init__(playlogs)
-        self.data = playlogs or []
+    def __init__(self, path=None):
+        # XXX: what if path doesn't exist or isn't a folder?
+        self.path = path or self.PLAYLOGS_FOLDER
+        self.update()
 
     @classmethod
     def filename_to_gamename(Class, filename):
         return filename.removesuffix(Class.FILENAME_SUFFIX).replace('-', ' ')
 
-    # FIXME: better more descriptive name
-    @classmethod
-    def generate(Class, path=None):
-        files = [f for f in os.scandir(path) if f.name.endswith(Class.FILENAME_SUFFIX)]
-        logs = [Playlog(f.path, game=Class.filename_to_gamename(f.name)) for f in files]
+    def update(self):
+        files = [f for f in os.scandir(self.path) if f.name.endswith(self.FILENAME_SUFFIX)]
+        logs = [Playlog(f.path, game=self.filename_to_gamename(f.name)) for f in files]
         for i, log in enumerate(logs):
             with open(log.file) as f:
                 first_line = f.readline()
-                if first_line.startswith(Class.NAMELINE_PREFIX):
-                    name = first_line.removeprefix(Class.NAMELINE_PREFIX).strip()
+                if first_line.startswith(self.NAMELINE_PREFIX):
+                    name = first_line.removeprefix(self.NAMELINE_PREFIX).strip()
                     logs[i] = log._replace(game=name)
-        return Class(logs)
+        self._logs = logs
 
     def game_names(self):
         # TODO: sort order?
-        return [playlog.game for playlog in self.data]
+        return [playlog.game for playlog in self._logs]
 
     @classmethod
     # TODO: instead return number representing how close a match
@@ -105,7 +103,7 @@ class PlaylogList(collections.UserList):
 
     def get_filenames_for(self, game):
         """Return list of playlog files that possibly record that game."""
-        return [p.file for p in self.data if self.compare_names(p.game, game)]
+        return [p.file for p in self._logs if self.compare_names(p.game, game)]
 
     def get_last_played_for(self, game):
         files = self.get_filenames_for(game)
@@ -143,7 +141,7 @@ def center_window(root, width=300, height=200):
     y = (screen_height/2) - (height/2)
     root.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
-PLAYLOG_LIST = PlaylogList.generate(PlaylogList.PLAYLOGS_FOLDER)
+PLAYLOG_HOLDER = PlaylogFolder()
 
 class AddPlaylogEntry:
     # 'w' (left), 'e' (right), or None (centered)
@@ -158,8 +156,8 @@ class AddPlaylogEntry:
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
         self.game_select = ttk.Combobox(frm)
         self.game_select.grid(column=1, row=0)
-        self.game_select['values'] = PLAYLOG_LIST.game_names()
-        self.game_select.bind('<<ComboboxSelected>>', lambda e: self.last_played.config(values=[PLAYLOG_LIST.get_last_played_for(self.game_select.get())]))
+        self.game_select['values'] = PLAYLOG_HOLDER.game_names()
+        self.game_select.bind('<<ComboboxSelected>>', lambda e: self.last_played.config(values=[PLAYLOG_HOLDER.get_last_played_for(self.game_select.get())]))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
         self.last_played = ttk.Combobox(frm)
