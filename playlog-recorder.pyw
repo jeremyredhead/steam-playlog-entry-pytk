@@ -155,13 +155,18 @@ class AddPlaylogEntry:
         # REMINDER: .get() to get a field's value (.insert() and .delete() to alter a text field)
 
         LABEL_SIDE = self.LABEL_SIDE
-        Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
-        self.game_select = ttk.Combobox(frm)
-        self.game_select.grid(column=1, row=0)
-        self.refresh_games_dropdown()
 
-        # FIXME: "Last played" should update when "Game" is edited in any way, not just selected
+        Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
+        self.game_var = StringVar()
+        self.game_select = ttk.Combobox(frm, textvariable=self.game_var)
+        self.game_select.grid(column=1, row=0)
+
+        def fuck_tkinter(*args):
+            self.refresh_last_played_dropdown(None)
+
+        self.refresh_games_dropdown()
         self.game_select.bind('<<ComboboxSelected>>', self.refresh_last_played_dropdown)
+        self.game_var.trace_add('write', fuck_tkinter)
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
         self.last_played = ttk.Combobox(frm)
@@ -193,7 +198,7 @@ root = Tk()
 # TODO: look into .iconbitmap() et al to set window icon to a custom thing
 root.title('Steam Playlog Recorder')
 center_window(root, 250, 110)
-AddPlaylogEntry(root)
+playlog_entry = AddPlaylogEntry(root)
 
 import sys
 if 'idlelib' in sys.modules:
