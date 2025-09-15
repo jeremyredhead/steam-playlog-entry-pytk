@@ -62,35 +62,53 @@ def parse_playlog_entries(file):
                 pass # ignore unrecognized lines
     return entries
 
-Playlog = collections.namedtuple('Playlog', ['file', 'game'])
+class Playlog():
+    # constants also used by PlaylogFolder
+    FILE_SUFFIX = '-playlog.txt'
+    NAME_MARKER = 'NAME:'
+
+    def __init__(self, file, file_suffix=None, name_marker=None):
+        self.file = file # fullpath or os.DirEntry ?
+        self.file_suffix = file_suffix or self.FILE_SUFFIX
+        self.name_marker = name_marker or self.NAME_MARKER
+        self.game = self._get_game_name()
+        # XXX: how TF to distinguish between old entries from disk and new ones added in memory??
+        self.entries = [] # initialized in self.refresh()
+        self.refresh()
+
+    def _get_game_name(self):
+        filename = os.path.basename(self.file)
+        # used as a fallback when a file lacks a NAME: line
+        name = filename.removesuffix(self.file_suffix).replace('-', ' ')
+        with open(self.file) as f:
+            first_line = f.readline()
+            if first_line.startswith(self.name_marker):
+                name = first_line.removeprefix(self.name_marker).strip()
+        return name
+
+    def refresh(self):
+        self.entries = parse_playlog_entries(self.file)
 
 class PlaylogFolder():
     """A folder with Playlogs in it. Duh."""
 
-    FILENAME_SUFFIX = '-playlog.txt'
-    NAMELINE_PREFIX = 'NAME:'
     PLAYLOGS_FOLDER = os.path.join(os.path.expanduser('~'), 'Documents', 'playlogs')
 
-    def __init__(self, path=None, *, log_suffix=None, nameline_prefix=None):
+    def __init__(self, path=None, *, log_suffix=None, log_name_marker=None):
         # XXX: what if path doesn't exist or isn't a folder?
         self.path = path or self.PLAYLOGS_FOLDER
-        self.log_suffix = log_suffix or self.FILENAME_SUFFIX
-        self.nameline_prefix = nameline_prefix or self.NAMELINE_PREFIX
+        self.log_suffix = log_suffix or Playlog.FILE_SUFFIX
+        self.log_name_marker = log_name_marker or Playlog.NAME_MARKER
+        self._logs = [] # initialized in self.refresh()
         self.refresh()
 
-    def _get_game_name(self, file):
-        # used as a fallback when a file lacks a NAME: line
-        name = os.path.basename(file).removesuffix(self.log_suffix).replace('-', ' ')
-        with open(file) as f:
-            first_line = f.readline()
-            if first_line.startswith(self.nameline_prefix):
-                name = first_line.removeprefix(self.nameline_prefix).strip()
-        return name
+    def _Playlog(self, file):
+        return Playlog(file, file_suffix=self.log_suffix, name_marker=self.log_name_marker)
 
     def refresh(self):
         is_playlog = lambda f: f.is_file() and f.name.endswith(self.log_suffix)
         files = [f for f in os.scandir(self.path) if is_playlog(f)]
-        logs = [Playlog(f.path, game=self._get_game_name(f)) for f in files]
+        logs = [self._Playlog(file) for file in files]
         self._logs = logs
 
     def game_names(self):
