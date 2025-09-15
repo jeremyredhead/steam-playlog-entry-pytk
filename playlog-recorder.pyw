@@ -120,16 +120,16 @@ class PlaylogFolder():
     def compare_names(name_a, name_b):
         return name_a.lower() == name_b.lower()
 
-    def get_filenames_for(self, game):
-        """Return list of playlog files that possibly record that game."""
-        return [p.file for p in self._logs if self.compare_names(p.game, game)]
+    def get_playlogs_for(self, game):
+        """Return list of playlogs that possibly record that game."""
+        return [log for log in self._logs if self.compare_names(log.game, game)]
 
     def get_last_played_for(self, game):
-        files = self.get_filenames_for(game)
-        if not files:
+        logs = self.get_playlogs_for(game)
+        if not logs:
             return '(never)'
-        elif len(files) == 1:
-            entries = parse_playlog_entries(files[0])
+        elif len(logs) == 1:
+            entries = logs[0].entries
             if not entries:
                 return '(never)'
             entry_date_text = entries[-1].entry_date
