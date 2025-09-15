@@ -42,26 +42,6 @@ class PlaylogEntry():
         args = ', '.join([f'{k}={repr(v)}' for (k,v) in vars(self).items()])
         return f'{name}({args})'
 
-def parse_playlog_entries(file):
-    entries = []
-    with open(file) as fd:
-        for line in fd:
-            line = line.rstrip()
-            if not line: continue
-            if line[-1] == ':':
-                entries.append(PlaylogEntry(line[:-1], '', ''))
-            # indented by tab or at least two spaces
-            elif line[0] == '\t' or line[0:2] == '  ':
-                key, value = line.lstrip().split(': ', 1)
-                if key.lower() == 'last played':
-                    entries[-1].last_played = value
-                if key.lower() == 'play time':
-                    entries[-1].play_time = value.removesuffix('hours').strip()
-                # ignore unrecognized keys
-            else:
-                pass # ignore unrecognized lines
-    return entries
-
 class Playlog():
     # constants also used by PlaylogFolder
     FILE_SUFFIX = '-playlog.txt'
@@ -87,7 +67,24 @@ class Playlog():
         return name
 
     def refresh(self):
-        self.entries = parse_playlog_entries(self.file)
+        entries = []
+        with open(self.file) as fd:
+            for line in fd:
+                line = line.rstrip()
+                if not line: continue
+                if line[-1] == ':':
+                    entries.append(PlaylogEntry(line[:-1], '', ''))
+                # indented by tab or at least two spaces
+                elif line[0] == '\t' or line[0:2] == '  ':
+                    key, value = line.lstrip().split(': ', 1)
+                    if key.lower() == 'last played':
+                        entries[-1].last_played = value
+                    if key.lower() == 'play time':
+                        entries[-1].play_time = value.removesuffix('hours').strip()
+                    # ignore unrecognized keys
+                else:
+                    pass # ignore unrecognized lines
+        self.entries = entries
 
 class PlaylogFolder():
     """A folder with Playlogs in it. Duh."""
