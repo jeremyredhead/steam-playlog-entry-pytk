@@ -176,12 +176,9 @@ class AddPlaylogEntry:
         self.game_select = ttk.Combobox(frm, textvariable=self.game_var)
         self.game_select.grid(column=1, row=0)
 
-        def fuck_tkinter(*args):
-            self.refresh_last_played_dropdown(None)
-
         self.refresh_games_dropdown()
         self.game_select.bind('<<ComboboxSelected>>', self.refresh_last_played_dropdown)
-        self.game_var.trace_add('write', fuck_tkinter)
+        self.game_var.trace_add('write', lambda *_: self.refresh_last_played_dropdown({}))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
         self.last_played = ttk.Combobox(frm)
