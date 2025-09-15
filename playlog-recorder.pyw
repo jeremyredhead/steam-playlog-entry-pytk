@@ -97,9 +97,9 @@ class PlaylogFolder():
         # TODO: sort order?
         return [playlog.game for playlog in self._logs]
 
-    @classmethod
+    @staticmethod
     # TODO: instead return number representing how close a match
-    def compare_names(Class, name_a, name_b):
+    def compare_names(name_a, name_b):
         return name_a.lower() == name_b.lower()
 
     def get_filenames_for(self, game):
