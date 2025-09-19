@@ -17,6 +17,14 @@ def parse_date(s):
             pass
     return None
 
+# adapted from <https://stackoverflow.com/a/7406369>
+def sanitize_filename(filename):
+    """Sanitize a string so it is legal filename (replaces slash characters too!)"""
+    is_legal = lambda c: c.isalnum() or c in ('.', '_')
+    # TODO: sanitize more better
+    filename = ''.join(c if is_legal(c) else '-' for c in filename).strip()
+    return filename
+
 class PlaylogEntry():
     def __init__(self, entry_date, last_played, play_time):
         self.entry_date = entry_date
@@ -52,8 +60,12 @@ class Playlog():
         self.file_suffix = file_suffix or self.FILE_SUFFIX
         self.name_marker = name_marker or self.NAME_MARKER
         self.game = self._get_game_name()
-        # XXX: how TF to distinguish between old entries from disk and new ones added in memory??
         self.entries = [] # initialized in self.refresh()
+        self.refresh()
+
+    def write_entry(self, entry):
+        with open(self.file, 'a+t') as f:
+            f.write(entry)
         self.refresh()
 
     def _get_game_name(self):
@@ -98,6 +110,27 @@ class PlaylogFolder():
         self.log_name_marker = log_name_marker or Playlog.NAME_MARKER
         self._logs = [] # initialized in self.refresh()
         self.refresh()
+
+    def new_playlog(self, game):
+        # rough opposite of Playlog._get_game_name
+        filename = sanitize_filename(game.lower() + self.log_suffix)
+        filename = os.path.join(self.path, filename)
+        # XXX: what do if file exist??
+        with open(filename, 'x+t') as f:
+            x.write(f'{self.log_name_marker} {game}\n')
+        new_log = self._Playlog(filename)
+        self._logs.append(new_log)
+        return new_log
+
+    def write_entry(self, *, game, entry):
+        logs = self.get_playlogs_for(game)
+        if not logs:
+            log = self.new_playlog(game)
+        elif len(logs) == 1:
+            log = logs[0]
+        else:
+            raise NotImplementedError("fuck me i'm bad at coding. or designing. w/e")
+        log.write_entry(entry)
 
     def _Playlog(self, file):
         return Playlog(file, file_suffix=self.log_suffix, name_marker=self.log_name_marker)
