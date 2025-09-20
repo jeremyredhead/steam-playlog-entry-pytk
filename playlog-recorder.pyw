@@ -177,8 +177,7 @@ class PlaylogFolder():
 
 #==UI SECTION==
 from tkinter import *
-from tkinter import ttk
-# from tkinter.ttk import *
+from tkinter.ttk import *
 
 # adapted from <https://stackoverflow.com/a/14910894>
 def center_window(root, width=300, height=200):
@@ -197,7 +196,7 @@ class AddPlaylogEntry:
     LABEL_SIDE = 'e'
 
     def __init__(self, root):
-        frm = ttk.Frame(root, padding=10)
+        frm = Frame(root, padding=10)
         frm.grid()
 
         # REMINDER: .get() to get a field's value (.insert() and .delete() to alter a text field)
@@ -206,7 +205,7 @@ class AddPlaylogEntry:
 
         Label(frm, text='Game:').grid(column=0, row=0, sticky=LABEL_SIDE)
         self.game_var = StringVar()
-        self.game_select = ttk.Combobox(frm, textvariable=self.game_var)
+        self.game_select = Combobox(frm, textvariable=self.game_var)
         self.game_select.grid(column=1, row=0)
 
         self.refresh_games_dropdown()
@@ -214,7 +213,7 @@ class AddPlaylogEntry:
         self.game_var.trace_add('write', lambda *_: self.refresh_last_played_dropdown({}))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
-        self.last_played = ttk.Combobox(frm)
+        self.last_played = Combobox(frm)
         self.last_played.grid(column=1, row=1)
         self.last_played['values'] = ['(never)']
 
@@ -226,10 +225,11 @@ class AddPlaylogEntry:
         self.play_time.grid(column=0, row=0)
         Label(sf, text='hours').grid(column=1, row=0)
 
-        ttk.Button(frm, text='Save entry').grid(column=1, row=3, sticky='e')
+        Button(frm, text='Save entry').grid(column=1, row=3, sticky='e')
 
         frm.rowconfigure(0, pad=2)
         frm.rowconfigure(1, pad=2)
+        frm.rowconfigure(2, pad=2)
 
     def refresh_games_dropdown(self):
         # TODO: auto-completing combo box
@@ -242,7 +242,7 @@ class AddPlaylogEntry:
 root = Tk()
 # TODO: look into .iconbitmap() et al to set window icon to a custom thing
 root.title('Steam Playlog Recorder')
-center_window(root, 250, 110)
+center_window(root, 250, 113)
 playlog_entry = AddPlaylogEntry(root)
 
 import sys
