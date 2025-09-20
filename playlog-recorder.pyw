@@ -30,6 +30,8 @@ def sanitize_filename(filename):
     filename = ''.join(c if is_legal(c) else '-' for c in filename).strip()
     return filename
 
+# THINK: PlaylogConfig class?
+
 class PlaylogEntry():
     def __init__(self, entry_date, last_played, play_time):
         self.entry_date = entry_date
@@ -147,6 +149,7 @@ class PlaylogFolder():
         return Playlog(file, file_suffix=self.log_suffix, name_marker=self.log_name_marker)
 
     def refresh(self):
+        # XXX: refactor list of logs to game-indexed dict of lists of logs? 🤔
         is_playlog = lambda f: f.is_file() and f.name.endswith(self.log_suffix)
         files = [f for f in os.scandir(self.path) if is_playlog(f)]
         logs = [self._Playlog(file) for file in files]
@@ -223,6 +226,7 @@ class AddPlaylogEntry:
 
         self.refresh_games_dropdown()
         self.game_select.bind('<<ComboboxSelected>>', self.refresh_last_played_dropdown)
+        # TODO: filter games dropdown based on game_select's value?
         self.game_var.trace_add('write', lambda *_: self.refresh_last_played_dropdown({}))
 
         Label(frm, text='Last played:').grid(column=0, row=1, sticky=LABEL_SIDE)
