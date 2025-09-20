@@ -64,8 +64,9 @@ class Playlog():
         self.refresh()
 
     def write_entry(self, entry):
+        # TODO: verify that entry is a PlaylogEntry or nah?
         with open(self.file, 'a+t') as f:
-            f.write(entry)
+            f.write(str(entry))
         self.refresh()
 
     def _get_game_name(self):
@@ -226,13 +227,31 @@ class AddPlaylogEntry:
         self.play_time.grid(column=0, row=0)
         Label(sf, text='hours').grid(column=1, row=0)
 
-        Button(frm, text='Save entry').grid(column=1, row=3, sticky='e')
+        save_button = Button(frm, text='Save entry', command=self.save_entry)
+        save_button.grid(column=1, row=3, sticky='e')
+        # are you fucking kidding me Tk. really?? you make me do this??
+        save_button.bind('<Return>', lambda e: save_button.invoke())
 
         root.bind('<Escape>', self.maybe_close_window)
 
         frm.rowconfigure(0, pad=2)
         frm.rowconfigure(1, pad=2)
         frm.rowconfigure(2, pad=2)
+
+    def save_entry(self):
+        fields = (self.game_select, self.last_played, self.play_time)
+        values = [field.get() for field in fields]
+        if not all(values):
+            return # TODO: display an error message via Label
+        new_entry = PlaylogEntry.now(values[1], values[2])
+        try:
+            PLAYLOG_HOLDER.write_entry(game=values[0], entry=new_entry)
+        except BaseException as err:
+            print(err)
+            return # TODO: display an error message via Label
+        for field in fields:
+            field.delete(0, END)
+        self.game_select.focus()
 
     def maybe_close_window(self, event):
         fields = (self.game_select, self.last_played, self.play_time)
