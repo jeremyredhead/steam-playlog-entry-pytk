@@ -5,7 +5,12 @@ import textwrap
 import collections
 
 # Constants
-DATE_FORMATS = ['%Y %b. %d, %I:%M %p', '%Y %B %d, %I:%M %p']
+DATE_FORMATS = [
+    '%Y %b. %d, %I:%M %p',
+    '%Y %b %d, %I:%M %p',
+    '%Y %B %d, %I:%M %p',
+    '%I:%M %p %m/%d/%Y', # Ms. Notepad's F5 date formatting
+]
 PREF_DATE_FMT = DATE_FORMATS[0]
 
 def parse_date(s):
