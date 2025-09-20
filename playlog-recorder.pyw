@@ -66,6 +66,8 @@ class Playlog():
         self.name_marker = name_marker or self.NAME_MARKER
         self.game = self._get_game_name()
         self.entries = [] # initialized in self.refresh()
+        # updated by self.refresh() if applicable
+        self.updated = os.stat(self.file).st_mtime
         self.refresh()
 
     def write_entry(self, entry):
@@ -103,6 +105,9 @@ class Playlog():
                 else:
                     pass # ignore unrecognized lines
         self.entries = entries
+        if entries:
+            date = parse_date(entries[-1].entry_date)
+            if date: self.updated = date.timestamp()
 
 class PlaylogFolder():
     """A folder with Playlogs in it. Duh."""
@@ -148,8 +153,9 @@ class PlaylogFolder():
         self._logs = logs
 
     def game_names(self):
-        # TODO: sort order?
-        return [playlog.game for playlog in self._logs]
+        # TODO: sort order options: filename, game name, file mtime, last entry date
+        logs = sorted(self._logs, key=lambda log: log.updated, reverse=True)
+        return [log.game for log in logs]
 
     @staticmethod
     # TODO: instead return number representing how close a match
