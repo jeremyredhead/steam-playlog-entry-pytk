@@ -252,7 +252,8 @@ root = Tk()
 # TODO: look into .iconbitmap() et al to set window icon to a custom thing
 root.title('Steam Playlog Recorder')
 # so we can actually see the whole title; may only work on Windows™️
-root.attributes('-toolwindow', True)
+# doesn't show up in taskbar if -toolwindow is set :c
+##root.attributes('-toolwindow', True)
 center_window(root, 250, 113)
 playlog_entry = AddPlaylogEntry(root)
 
