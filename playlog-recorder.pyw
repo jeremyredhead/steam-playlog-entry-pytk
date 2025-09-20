@@ -207,6 +207,7 @@ class AddPlaylogEntry:
         self.game_var = StringVar()
         self.game_select = Combobox(frm, textvariable=self.game_var)
         self.game_select.grid(column=1, row=0)
+        self.game_select.focus()
 
         self.refresh_games_dropdown()
         self.game_select.bind('<<ComboboxSelected>>', self.refresh_last_played_dropdown)
@@ -227,9 +228,17 @@ class AddPlaylogEntry:
 
         Button(frm, text='Save entry').grid(column=1, row=3, sticky='e')
 
+        root.bind('<Escape>', self.maybe_close_window)
+
         frm.rowconfigure(0, pad=2)
         frm.rowconfigure(1, pad=2)
         frm.rowconfigure(2, pad=2)
+
+    def maybe_close_window(self, event):
+        fields = (self.game_select, self.last_played, self.play_time)
+        values = [field.get() for field in fields]
+        if not any(values):
+            root.destroy()
 
     def refresh_games_dropdown(self):
         # TODO: auto-completing combo box
@@ -242,6 +251,8 @@ class AddPlaylogEntry:
 root = Tk()
 # TODO: look into .iconbitmap() et al to set window icon to a custom thing
 root.title('Steam Playlog Recorder')
+# so we can actually see the whole title; may only work on Windows™️
+root.attributes('-toolwindow', True)
 center_window(root, 250, 113)
 playlog_entry = AddPlaylogEntry(root)
 
