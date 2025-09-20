@@ -251,6 +251,7 @@ class AddPlaylogEntry:
             return # TODO: display an error message via Label
         for field in fields:
             field.delete(0, END)
+        self.refresh_games_dropdown() # in case of new playlog
         self.game_select.focus()
 
     def maybe_close_window(self, event):
