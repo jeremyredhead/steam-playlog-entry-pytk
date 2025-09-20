@@ -118,7 +118,7 @@ class PlaylogFolder():
         filename = os.path.join(self.path, filename)
         # XXX: what do if file exist??
         with open(filename, 'x+t') as f:
-            x.write(f'{self.log_name_marker} {game}\n')
+            f.write(f'{self.log_name_marker} {game}\n')
         new_log = self._Playlog(filename)
         self._logs.append(new_log)
         return new_log
