@@ -195,14 +195,16 @@ from tkinter import *
 from tkinter.ttk import *
 
 # adapted from <https://stackoverflow.com/a/14910894>
-def center_window(root, width=300, height=200):
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
+def center_window(window, width=None, height=None):
+    width = width or window.winfo_reqwidth()
+    height = height or window.winfo_reqheight()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
 
     # calculate position x and y coordinates
     x = (screen_width/2) - (width/2)
     y = (screen_height/2) - (height/2)
-    root.geometry('%dx%d+%d+%d' % (width, height, x, y))
+    window.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
 PLAYLOG_HOLDER = PlaylogFolder()
 
@@ -289,8 +291,8 @@ root.title('Steam Playlog Recorder')
 # so we can actually see the whole title; may only work on Windows™️
 # doesn't show up in taskbar if -toolwindow is set :c
 ##root.attributes('-toolwindow', True)
-center_window(root, 250, 113)
 playlog_entry = AddPlaylogEntry(root)
+root.after(1, lambda: center_window(root))
 
 import sys
 if 'idlelib' in sys.modules:
