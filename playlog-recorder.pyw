@@ -196,6 +196,7 @@ from tkinter.ttk import *
 
 # adapted from <https://stackoverflow.com/a/14910894>
 def center_window(window, width=None, height=None):
+    window.update_idletasks() # so it works even before mainloop() is called
     width = width or window.winfo_reqwidth()
     height = height or window.winfo_reqheight()
     screen_width = window.winfo_screenwidth()
@@ -292,7 +293,7 @@ root.title('Steam Playlog Recorder')
 # doesn't show up in taskbar if -toolwindow is set :c
 ##root.attributes('-toolwindow', True)
 playlog_entry = AddPlaylogEntry(root)
-root.after(1, lambda: center_window(root))
+center_window(root)
 
 import sys
 if 'idlelib' in sys.modules:
